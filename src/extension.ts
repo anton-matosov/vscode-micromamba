@@ -6,7 +6,7 @@ import {
   activateTerminal,
 } from './activations'
 import { activateProcessEnv, initProcessEnv } from './activations/activateProcessEnv'
-import { ExtensionContext, window, workspace } from 'vscode'
+import { ExtensionContext, window, workspace, TerminalOptions } from 'vscode'
 import { makeEnvironmentInfo } from './micromamba/makeEnvironmentInfo'
 
 export function activate(ctx: ExtensionContext): void {
@@ -14,16 +14,32 @@ export function activate(ctx: ExtensionContext): void {
     window.showInformationMessage('Micromamba: Open a folder or a workspace')
     return
   }
-  initProcessEnv(ctx, workspace.workspaceFolders[0])
+  // initProcessEnv(ctx, workspace.workspaceFolders[0])
   const info$ = makeEnvironmentInfo(ctx, workspace.workspaceFolders[0])
   ctx.subscriptions.push(
     activateCommands(info$),
     activateStatusBarItem(info$),
     activateDotEnvFile(info$),
     activateTerminal(info$, ctx),
-    activateProcessEnv(info$),
+    // activateProcessEnv(info$),
     activateContextFlags(info$),
   )
+  // activateTerm();
+}
+
+export function activateTerm(): void {
+  const envCollection = {
+    'PATH': '/my/custom/path'
+  };
+
+  const terminalOptions: TerminalOptions = {
+    env: envCollection,
+    strictEnv: true,
+    name: 'My Terminal'
+  };
+
+  const terminal = window.createTerminal(terminalOptions);
+  terminal.show();
 }
 
 export function deactivate(): void {
